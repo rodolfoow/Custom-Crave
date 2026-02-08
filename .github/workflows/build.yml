@@ -12,11 +12,15 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. Crave CLI-ni ishonchli usulda o'rnatish (Xato tuzatildi)
-      - name: Install Crave CLI
+      # 2a. Crave CLI yuklash skriptini ishga tushirish
+      - name: Download Crave Script
+        run: curl -s https://raw.githubusercontent.com | bash
+
+      # 2b. 'crave' faylini tizimga o'rnatish va ruxsat berish
+      - name: Install Crave Binary
         run: |
-          curl -s https://raw.githubusercontent.com | bash
-          # Faylni to'g'ri joyga o'tkazamiz, shunda keyingi bosqichlar uni topa oladi
+          # 'crave' joriy papkada turibdi, uni tizim PATH ga o'tkazamiz
+          chmod +x crave
           sudo install crave /usr/local/bin
 
       # 3. GitHub Secrets orqali crave.conf faylini sozlash
@@ -46,4 +50,4 @@ jobs:
           lunch aosp_spes-userdebug ; \
           m bacon -j\$(nproc --all) \
           "
-
+          
