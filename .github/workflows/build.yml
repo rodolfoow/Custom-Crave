@@ -1,36 +1,40 @@
-name: Build ROM
+name: Custom ROM Build
+
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Build-ni qo'lda ishga tushirish uchun
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout
+      # 1. Kodlarni yuklab olish
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Install Crave
+      # 2. Crave-ni o'rnatish
+      - name: Install Crave CLI
         run: |
-          curl -s https://raw.githubusercontent.com/accupara/crave/master/get_crave.sh | bash
-          sudo mv crave /usr/local/bin/
+          curl -s https://raw.githubusercontent.com | bash
+          sudo install crave /usr/local/bin
 
-      - name: Run Build
-        env:
-          CONF_JSON: ${{ secrets.CRAVE_CONF_FILE }}
+      # 3. crave.conf faylini yaratish (Siz so'ragan qism)
+      - name: Configure Crave
         run: |
-          if [ -z "$CONF_JSON" ]; then
-            echo "XATO: Secret hali ham topilmadi. Settings bo'limidan Repository Secret qo'shing!"
-            exit 1
-          fi
+          echo "username: ${{ secrets.CRAVE_USERNAME }}" > crave.conf
+          echo "authToken: ${{ secrets.CRAVE_TOKEN }}" >> crave.conf
+          # Faylni to'g'ri joyga qo'yilganini tasdiqlash
+          mkdir -p ~/.crave
+          cp crave.conf ~/.crave/crave.conf
 
-          echo "$CONF_JSON" > crave.conf
-          
-          crave -c crave.conf run --no-patch -- "repo init -u https://github.com/PixelExperience/manifest -b thirteen; \
-          rm -rf .repo/local_manifests; \
-          mkdir -p .repo/local_manifests; \
-          curl -L https://raw.githubusercontent.com/rodolfoow/spes.xml/main/spes.xml > .repo/local_manifests/spes.xml; \
-          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags; \
-          source build/envsetup.sh; \
-          lunch aosp_spes-userdebug; \
-          make bacon"
-          
+      # 4. Build-ni boshlash
+      - name: Run Build Command
+        run: |
+          # 'crave run' buyrug'i orqali build-ni masofadan boshlaysiz
+          # O'zingizning build buyrug'ingizni yozing (misol pastda)
+          crave run -- "repo init -u https://github.com -b lineage-21.0 --git-lfs ; \
+                        repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags ; \
+                        source build/envsetup.sh ; \
+                        lunch lineage_device-userdebug ; \
+                        mka bacon"
+                        
