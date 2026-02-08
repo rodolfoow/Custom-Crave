@@ -61,3 +61,11 @@ jobs:
           m bacon -j\$(nproc --all) \
           "
           
+      # 5. Tayyor ROM (.zip fayl)ni yuklab olish
+      - name: Download Built ROM Artifacts
+        run: |
+          # Build tugagandan so'ng, ushbu buyruq orqali fayllarni qaytarib olasiz
+          crave pull 
+          # Fayl qayerga yuklanganini tekshirish (ixtiyoriy)
+          ls -l out/target/product/spes/*.zip
+          
