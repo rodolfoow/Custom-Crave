@@ -1,0 +1,30 @@
+name: Build ROM
+on:
+  workflow_dispatch: # Buildni qo'lda boshlash uchun
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Crave
+        run: curl -s https://raw.githubusercontent.com/accupara/crave/master/get_crave.sh | bash
+
+      - name: Configure Crave
+        run: |
+          mkdir -p ~/.crave
+          echo "${{ secrets.CRAVE_CONF_FILE }}" > ~/.crave/crave.conf
+
+      - name: Run Build on Crave
+        run: |
+          crave run -- "repo init -u https://github.com/PixelExperience/manifest -b thirteen; \
+          rm -rf .repo/local_manifests; \
+          mkdir -p .repo/local_manifests; \
+          curl -L https://raw.githubusercontent.com/rodolfoow/spes.xml/main/spes.xml > .repo/local_manifests/spes.xml; \
+          repo sync -c -j$(nproc --all) --force-sync --no-clone-bundle --no-tags; \
+          . build/envsetup.sh; \
+          lunch aosp_spes-userdebug; \
+          make bacon"
+          
