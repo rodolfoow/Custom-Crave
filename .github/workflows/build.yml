@@ -1,6 +1,6 @@
 name: Build ROM
 on:
-  workflow_dispatch: # Buildni qo'lda boshlash uchun
+  workflow_dispatch:
 
 jobs:
   build:
@@ -9,11 +9,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Install Crave
-        run: curl -s https://raw.githubusercontent.com/accupara/crave/master/get_crave.sh | bash
-
-      - name: Configure Crave
+      - name: Install and Configure Crave
         run: |
+          # Crave-ni yuklab olish va o'rnatish
+          curl -s https://raw.githubusercontent.com/accupara/crave/master/get_crave.sh | bash
+          
+          # Tizimga "crave" buyrug'ini tanitish
+          sudo mv crave /usr/local/bin/
+          
+          # Konfiguratsiyani sozlash
           mkdir -p ~/.crave
           echo "${{ secrets.CRAVE_CONF_FILE }}" > ~/.crave/crave.conf
 
