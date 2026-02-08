@@ -1,53 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<manifest>
-  <project path="device/xiaomi/spes" name="sayann70/device_xiaomi_spes" remote="github" revision="thirteen" />
+<build>
+  <!-- ROM bazasini tanlash: Pixel Experience 13 -->
+  <manifest url="https://github.com" branch="thirteen" />
 
-  <project path="vendor/xiaomi/spes" name="sayann70/vendor_xiaomi_spes" remote="github" revision="thirteen" />
-
-  <project path="kernel/xiaomi/spes" name="sayann70/kernel_xiaomi_spes" remote="github" revision="thirteen" />
+  <!-- Sayann70 manbalari va spes uchun kerakli tree-larni qo'shish -->
+  <remote name="sayann" fetch="https://github.com" />
   
-  <project path="hardware/xiaomi" name="sayann70/hardware_xiaomi" remote="github" revision="thirteen" />
-</manifest>
-name: Build Pixel Experience - spes
+  <!-- Device Tree, Kernel va Vendor -->
+  <project name="device_xiaomi_spes" path="device/xiaomi/spes" remote="sayann" revision="13" />
+  <project name="vendor_xiaomi_spes" path="vendor/xiaomi/spes" remote="sayann" revision="13" />
+  <project name="kernel_xiaomi_spes" path="kernel/xiaomi/spes" remote="sayann" revision="13" />
+  
+  <!-- Common qismlar (agar kerak bo'lsa) -->
+  <project name="device_xiaomi_sm6225-common" path="device/xiaomi/sm6225-common" remote="sayann" revision="13" />
+  <project name="vendor_xiaomi_sm6225-common" path="vendor/xiaomi/sm6225-common" remote="sayann" revision="13" />
 
-on:
-  workflow_dispatch:
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install Crave CLI
-        run: |
-          curl -s https://raw.githubusercontent.com | bash
-          sudo install crave /usr/local/bin
-
-      - name: Set up Crave Config
-        run: |
-          mkdir -p ~/.crave
-          echo "username: ${{ secrets.CRAVE_USERNAME }}" > ~/.crave/crave.conf
-          echo "authToken: ${{ secrets.CRAVE_TOKEN }}" >> ~/.crave/crave.conf
-
-      - name: Start Build on Crave
-        run: |
-          crave run -- " \
-          # 1. ROM bazasini sozlash
-          repo init -u https://github.com -b thirteen ; \
-          
-          # 2. Local manifest (Device tree, Kernel, Vendor) qo'shish
-          rm -rf .repo/local_manifests ; \
-          mkdir -p .repo/local_manifests ; \
-          curl -L https://raw.githubusercontent.com > .repo/local_manifests/spes.xml ; \
-          
-          # 3. Sync qilish (Crave-da bu tez amalga oshadi)
-          repo sync -c -j\$(nproc --all) --force-sync --no-clone-bundle --no-tags ; \
-          
-          # 4. Build-ni boshlash
-          source build/envsetup.sh ; \
-          lunch aosp_spes-userdebug ; \
-          make bacon -j\$(nproc --all) \
-          "
+  <!-- Build buyruqlari -->
+  <commands>
+    <command>source build/envsetup.sh</command>
+    <command>lunch aosp_spes-userdebug</command>
+    <command>make bacon -j$(nproc --all)</command>
+  </commands>
+</build>
